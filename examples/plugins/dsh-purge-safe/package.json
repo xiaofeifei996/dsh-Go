@@ -5,8 +5,18 @@
   "description": "DSH Go native safe manager: self-check, own settings, backups and rollback",
   "type": "module",
   "main": "lib/index.js",
-  "exports": { ".": "./lib/index.js" },
-  "files": ["lib", "test", "package.json", "NOTICE.md", "cordis.patch.yml"],
+  "exports": {
+    ".": "./lib/index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "test",
+    "package.json",
+    "NOTICE.md",
+    "cordis.patch.yml"
+  ],
   "scripts": {
     "test": "node --test test/*.test.js",
     "check": "node ../../../sdk/plugin-kit/bin/check.mjs . --load"
@@ -15,27 +25,41 @@
     "node": ">=22.19",
     "dsh": ">=0.2.1-rc.2 <0.3.0-0"
   },
-  "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    }
-  },
   "dshGo": {
     "v": 1,
-    "title": { "zh": "安全管理", "en": "Safe Manager" },
+    "title": {
+      "zh": "安全管理",
+      "en": "Safe Manager"
+    },
     "icon": "settings",
     "contributes": {
       "composer.strip": [
-        { "id": "safe-manager", "icon": "settings", "text": "安全管理", "panel": "manager" }
+        {
+          "id": "safe-manager",
+          "icon": "settings",
+          "text": "安全管理",
+          "panel": "manager"
+        }
       ],
       "panels": [
         {
           "id": "manager",
-          "title": { "zh": "安全管理", "en": "Safe Manager" },
+          "title": {
+            "zh": "安全管理",
+            "en": "Safe Manager"
+          },
           "icon": "settings",
-          "placement": ["session.tab", "features"]
+          "placement": [
+            "session.tab",
+            "features"
+          ]
         }
       ]
+    }
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
     }
   }
 }
