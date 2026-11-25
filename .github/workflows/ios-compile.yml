@@ -113,6 +113,30 @@ jobs:
         working-directory: app
         run: bash ../tooling/ios/build.sh --release --no-codesign
 
+      - name: Package unsigned IPA
+        if: ${{ !inputs.regression_only }}
+        working-directory: app
+        run: |
+          set -euo pipefail
+          app_path="build/ios/iphoneos/Runner.app"
+          test -d "$app_path" || { echo "::error::Runner.app not found at $app_path"; find build/ios -maxdepth 4 -name '*.app' -print; exit 1; }
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app_path/Info.plist"
+          mkdir -p "$RUNNER_TEMP/ipa/Payload"
+          ditto "$app_path" "$RUNNER_TEMP/ipa/Payload/Runner.app"
+          (cd "$RUNNER_TEMP/ipa" && /usr/bin/zip -qry "$GITHUB_WORKSPACE/DSH-Go-unsigned.ipa" Payload)
+          test -s "$GITHUB_WORKSPACE/DSH-Go-unsigned.ipa"
+          echo "Unsigned IPA created: DSH-Go-unsigned.ipa"
+          shasum -a 256 "$GITHUB_WORKSPACE/DSH-Go-unsigned.ipa"
+
+      - name: Upload unsigned IPA
+        if: ${{ !inputs.regression_only }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: DSH-Go-unsigned-IPA
+          path: DSH-Go-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 7
+
   engine:
     runs-on: macos-26
     timeout-minutes: 120
