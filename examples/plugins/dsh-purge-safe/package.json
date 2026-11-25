@@ -6,7 +6,7 @@
   "type": "module",
   "main": "lib/index.js",
   "exports": { ".": "./lib/index.js" },
-  "files": ["lib", "test", "package.json", "NOTICE.md"],
+  "files": ["lib", "test", "package.json", "NOTICE.md", "cordis.patch.yml"],
   "scripts": {
     "test": "node --test test/*.test.js",
     "check": "node ../../../sdk/plugin-kit/bin/check.mjs . --load"
@@ -14,6 +14,11 @@
   "engines": {
     "node": ">=22.19",
     "dsh": ">=0.2.1-rc.2 <0.3.0-0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
   },
   "dshGo": {
     "v": 1,
