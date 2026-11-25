@@ -1,0 +1,36 @@
+{
+  "name": "dsh-purge-safe",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DSH Go native safe manager: self-check, own settings, backups and rollback",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": { ".": "./lib/index.js" },
+  "files": ["lib", "test", "package.json", "NOTICE.md"],
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node ../../../sdk/plugin-kit/bin/check.mjs . --load"
+  },
+  "engines": {
+    "node": ">=22.19",
+    "dsh": ">=0.2.1-rc.2 <0.3.0-0"
+  },
+  "dshGo": {
+    "v": 1,
+    "title": { "zh": "安全管理", "en": "Safe Manager" },
+    "icon": "settings",
+    "contributes": {
+      "composer.strip": [
+        { "id": "safe-manager", "icon": "settings", "text": "安全管理", "panel": "manager" }
+      ],
+      "panels": [
+        {
+          "id": "manager",
+          "title": { "zh": "安全管理", "en": "Safe Manager" },
+          "icon": "settings",
+          "placement": ["session.tab", "features"]
+        }
+      ]
+    }
+  }
+}
