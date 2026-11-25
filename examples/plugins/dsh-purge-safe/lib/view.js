@@ -1,4 +1,4 @@
-const binding = (key) => ({ $: `data.${key}` });
+const binding = (key) => ({ $: 'data.' + key });
 
 function legacyView() {
   return {
@@ -24,9 +24,7 @@ function legacyView() {
 
 export function managerView(_scope, caps = {}) {
   const components = Array.isArray(caps.components) ? caps.components : [];
-  if (!components.includes('form') || !components.includes('toggle') || !components.includes('number')) {
-    return legacyView();
-  }
+  if (!components.includes('form') || !components.includes('toggle') || !components.includes('number')) return legacyView();
   return {
     v: 2,
     type: 'stack',

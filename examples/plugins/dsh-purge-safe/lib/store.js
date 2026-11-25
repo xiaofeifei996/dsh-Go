@@ -17,14 +17,14 @@ function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 function supportedNodeVersion(version = process.versions.node) {
-  const [major, minor] = version.split('.').map(Number);
-  return major > 22 || (major === 22 && minor >= 19);
+  const parts = version.split('.').map(Number);
+  return parts[0] > 22 || (parts[0] === 22 && parts[1] >= 19);
 }
 export function validateConfig(value) {
   if (!isPlainObject(value)) throw new Error('配置必须是 JSON 对象');
   if (typeof value.enabled !== 'boolean') throw new Error('enabled 必须是布尔值');
   if (!Number.isInteger(value.backupRetention) || value.backupRetention < 1 || value.backupRetention > MAX_RETENTION) {
-    throw new Error(\`backupRetention 必须是 1–\${MAX_RETENTION} 的整数\`);
+    throw new Error('backupRetention 必须是 1–' + MAX_RETENTION + ' 的整数');
   }
   if (typeof value.verbose !== 'boolean') throw new Error('verbose 必须是布尔值');
   return { enabled: value.enabled, backupRetention: value.backupRetention, verbose: value.verbose };
@@ -38,7 +38,7 @@ function safeDirectory(dir, create = false) {
 function atomicWrite(file, bytes) {
   const dir = path.dirname(file);
   safeDirectory(dir);
-  const tmp = path.join(dir, \`.tmp-\${crypto.randomUUID()}\`);
+  const tmp = path.join(dir, '.tmp-' + crypto.randomUUID());
   let fd;
   try {
     fd = fs.openSync(tmp, 'wx', 0o600);
@@ -103,17 +103,17 @@ export class SafeStore {
     this.ensure();
     const config = this.readConfig();
     const createdAt = new Date().toISOString();
-    const id = \`backup-\${createdAt.replace(/[-:]/g, '').replace(/\.\d{3}/, '').replace(/Z$/, 'Z')}-\${crypto.randomUUID()}\`;
+    const compactDate = createdAt.replace(/[-:]/g, '').replace(/\.\d{3}/, '').replace(/Z$/, 'Z');
+    const id = 'backup-' + compactDate + '-' + crypto.randomUUID();
     const doc = { format: 1, id, createdAt, reason, config };
-    const body = JSON.stringify(config);
-    doc.sha256 = digest(body);
-    atomicWrite(path.join(this.backupDir, \`\${id}.json\`), JSON.stringify(doc, null, 2) + '\n');
+    doc.sha256 = digest(JSON.stringify(config));
+    atomicWrite(path.join(this.backupDir, id + '.json'), JSON.stringify(doc, null, 2) + '\n');
     this.prune(config.backupRetention);
     return { id, createdAt, config };
   }
   prune(retention) {
     const keep = this.listBackups().slice(0, Math.max(1, Math.min(MAX_RETENTION, retention)));
-    const keepNames = new Set(keep.map(x => \`\${x.id}.json\`));
+    const keepNames = new Set(keep.map(x => x.id + '.json'));
     for (const name of fs.readdirSync(this.backupDir)) {
       if (!/^backup-[0-9]{8}T[0-9]{6}Z-[a-f0-9-]{36}\.json$/.test(name) || keepNames.has(name)) continue;
       const file = path.join(this.backupDir, name);
@@ -153,7 +153,7 @@ export class SafeStore {
       rows.push({ label: '配置文件', value: error.message, ok: false });
     }
     const backups = this.listBackups();
-    rows.push({ label: '可用备份', value: \`\${backups.length} 份（仅插件自身配置）\`, ok: true });
+    rows.push({ label: '可用备份', value: String(backups.length) + ' 份（仅插件自身配置）', ok: true });
     return { rows, ok: rows.every(row => row.ok) };
   }
 }
