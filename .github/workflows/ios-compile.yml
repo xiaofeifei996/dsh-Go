@@ -206,6 +206,18 @@ jobs:
           fi
           ls -la app/ios/Engine
 
+      # Keep the exact prepared runtime archive for inspecting the pinned DSH
+      # package output. This is a short-lived CI artifact, not a shipped app file.
+      - name: Keep prepared iOS runtime archive for plugin integration
+        if: ${{ !inputs.regression_only && steps.prepare.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ios-prepared-runtime
+          path: app/ios/Engine/runtime.zip
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 3
+
       # Embed DSH Engine spends 20 to 60 seconds compiling three small unsigned host frameworks for
       # the simulator. Main compiles them from source as always and keeps them; the PR regression
       # restores them, and embed-engine.sh finds its stamp current and skips the compile. The key
