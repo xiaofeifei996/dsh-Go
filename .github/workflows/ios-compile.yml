@@ -30,7 +30,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: ios-compile-${{ github.ref }}
+  # Reusable workflows inherit the caller's workflow identity. Keep the standalone
+  # iOS build and CI's iOS regression in separate groups so they cannot cancel each other.
+  group: ios-compile-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
