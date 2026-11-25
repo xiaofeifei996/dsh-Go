@@ -1,0 +1,31 @@
+name: dsh-purge-safe plugin check
+
+on:
+  pull_request:
+    paths:
+      - "examples/plugins/dsh-purge-safe/**"
+      - "sdk/plugin-kit/**"
+      - ".github/workflows/dsh-purge-safe-check.yml"
+  push:
+    branches:
+      - feature/dsh-purge-safe-manager
+    paths:
+      - "examples/plugins/dsh-purge-safe/**"
+      - "sdk/plugin-kit/**"
+      - ".github/workflows/dsh-purge-safe-check.yml"
+
+jobs:
+  plugin-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.19.0"
+      - name: Run plugin tests
+        run: node --test examples/plugins/dsh-purge-safe/test/*.test.js
+      - name: Run official DSH Go plugin checker
+        run: node sdk/plugin-kit/bin/check.mjs examples/plugins/dsh-purge-safe --load
+      - name: Verify package contents
+        working-directory: examples/plugins/dsh-purge-safe
+        run: npm pack --dry-run --ignore-scripts
