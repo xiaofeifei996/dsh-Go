@@ -25,6 +25,13 @@ IMAGE_CODEC = 'node_modules/@deepseek-ai/dsh-attachment-local/lib/ios-sharp.cjs'
 WORKER_ENV = 'runtime/ios/process/worker-env.mjs'
 PRELOAD = 'runtime/ohos/preload.mjs'
 RELOCATION_FILES = ('runtime/ios/storage/relocate.mjs', 'runtime/ios/storage/preload.mjs')
+SAFE_MANAGER_FILES = {
+    'runtime/ios/dsh-purge-safe/package.json': 'examples/plugins/dsh-purge-safe/package.json',
+    'runtime/ios/dsh-purge-safe/NOTICE.md': 'examples/plugins/dsh-purge-safe/NOTICE.md',
+    'runtime/ios/dsh-purge-safe/lib/index.js': 'examples/plugins/dsh-purge-safe/lib/index.js',
+    'runtime/ios/dsh-purge-safe/lib/store.js': 'examples/plugins/dsh-purge-safe/lib/store.js',
+    'runtime/ios/dsh-purge-safe/lib/view.js': 'examples/plugins/dsh-purge-safe/lib/view.js',
+}
 PRELOAD_BEFORE = "await import('./publication/preload.mjs');\n"
 PRELOAD_AFTER = PRELOAD_BEFORE + "await import('../ios/storage/preload.mjs');\n"
 # Keep platform diagnostics local to the iOS output; each exact edit must match once.
@@ -272,6 +279,8 @@ def specialize(expanded, out, composer):
     worker_env = (Path(__file__).resolve().parents[2] / WORKER_ENV).read_bytes()
     relocation = {name: (Path(__file__).resolve().parents[2] / name).read_bytes()
                   for name in (*RELOCATION_FILES, *guest.FILES)}
+    relocation.update({target: (Path(__file__).resolve().parents[2] / source).read_bytes()
+                       for target, source in SAFE_MANAGER_FILES.items()})
     preload = (expanded / 'files' / PRELOAD).read_text()
     if preload.count(PRELOAD_BEFORE) != 1 or '../ios/storage/preload.mjs' in preload:
         raise ValueError('iOS relocation preload differs from the shared input')
