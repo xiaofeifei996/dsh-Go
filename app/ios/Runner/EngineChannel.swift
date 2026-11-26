@@ -1480,6 +1480,11 @@ final class EngineChannel: NSObject, FlutterStreamHandler {
   /// failure leaves the engine without phone tools rather than without an engine.
   private func preparePhone() throws {
     var entries: [[String: Any]] = []
+    var insertions: [[String: Any]] = []
+    let safeManagerEntry = installer.root.appendingPathComponent("runtime/ios/dsh-purge-safe/lib/index.js")
+    if FileManager.default.fileExists(atPath: safeManagerEntry.path) {
+      insertions.append(["id": "dsh-purge-safe", "name": safeManagerEntry.path])
+    }
     if let library = native?.library, let source = Bundle.main.url(forResource: "phone", withExtension: nil, subdirectory: "dsh-runtime") {
       let target = installer.root.appendingPathComponent("runtime/ios/phone", isDirectory: true)
       try? FileManager.default.removeItem(at: target)
@@ -1509,15 +1514,14 @@ final class EngineChannel: NSObject, FlutterStreamHandler {
         }
       }
       if let prepared {
-        entries = [[
-          "insert": [[
-            "id": "dsh-go-ios-phone",
-            "name": target.appendingPathComponent("plugin.mjs").path,
-            "config": ["directory": prepared.directory.path, "runId": prepared.runId],
-          ]],
-        ]]
+        insertions.append([
+          "id": "dsh-go-ios-phone",
+          "name": target.appendingPathComponent("plugin.mjs").path,
+          "config": ["directory": prepared.directory.path, "runId": prepared.runId],
+        ])
       }
     }
+    if !insertions.isEmpty { entries = [["insert": insertions]] }
     // node_runner.cc passes this file on every run: an empty one means no phone tools.
     let patch = try JSONSerialization.data(withJSONObject: entries, options: .withoutEscapingSlashes)
     try patch.write(to: dshHome.appendingPathComponent("ios-host.patch.json"), options: .atomic)
