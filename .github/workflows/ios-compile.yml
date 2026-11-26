@@ -49,6 +49,7 @@ jobs:
           bash tooling/ios/build-phone-self-runner.sh --check
           python3 tooling/ios/tests/phone-self-runner.test.py -v
           python3 -B tooling/ios/test-channel-contract.py -v
+          python3 -B tooling/ios/test-safe-manager-bundle.py -v
 
   compile:
     if: ${{ !inputs.regression_only }}
